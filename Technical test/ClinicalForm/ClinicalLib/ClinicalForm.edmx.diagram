@@ -5,7 +5,12 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="fa387df82af044518d8c9384ad696adf" Name="Diagram1">
-        <EntityTypeShape EntityType="ClinicalFormModel.Patient" Width="1.5" PointX="3" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="ClinicalFormModel.BloodType" Width="1.5" PointX="0.75" PointY="5.375" />
+        <EntityTypeShape EntityType="ClinicalFormModel.Country" Width="1.5" PointX="0.75" PointY="1.125" />
+        <EntityTypeShape EntityType="ClinicalFormModel.Patient" Width="1.5" PointX="3" PointY="1" />
+        <AssociationConnector Association="ClinicalFormModel.FK_Patient_BloodType" />
+        <AssociationConnector Association="ClinicalFormModel.FK_Patient_Country" />
+        <EntityTypeShape EntityType="ClinicalFormModel.Audit" Width="1.5" PointX="4.875" PointY="4" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

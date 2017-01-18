@@ -48,6 +48,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Audit.cs">
+      <DependentUpon>ClinicalForm.tt</DependentUpon>
+    </Compile>
+    <Compile Include="BloodType.cs">
+      <DependentUpon>ClinicalForm.tt</DependentUpon>
+    </Compile>
     <Compile Include="ClinicalForm.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -63,12 +69,16 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ClinicalForm.edmx</DependentUpon>
     </Compile>
+    <Compile Include="Country.cs">
+      <DependentUpon>ClinicalForm.tt</DependentUpon>
+    </Compile>
     <Compile Include="GetAllPatients_Result.cs">
       <DependentUpon>ClinicalForm.tt</DependentUpon>
     </Compile>
     <Compile Include="Models\AjaxResp.cs" />
+    <Compile Include="Models\View_Patient.cs" />
+    <Compile Include="Rules\AuditCRUD.cs" />
     <Compile Include="Rules\PatientCRUD.cs" />
-    <None Include="Models\Patient.csa" />
     <Compile Include="Patient.cs">
       <DependentUpon>ClinicalForm.tt</DependentUpon>
     </Compile>

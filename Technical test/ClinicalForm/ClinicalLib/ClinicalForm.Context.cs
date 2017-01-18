@@ -14,7 +14,6 @@ namespace ClinicalLib
     using System.Data.Entity.Infrastructure;
     using System.Data.Entity.Core.Objects;
     using System.Linq;
-    using System.Data.SqlClient;
     
     public partial class ClinicalFormEntities : DbContext
     {
@@ -28,23 +27,14 @@ namespace ClinicalLib
             throw new UnintentionalCodeFirstException();
         }
     
+        public virtual DbSet<BloodType> BloodType { get; set; }
+        public virtual DbSet<Country> Country { get; set; }
         public virtual DbSet<Patient> Patient { get; set; }
+        public virtual DbSet<Audit> Audit { get; set; }
     
         public virtual ObjectResult<GetAllPatients_Result> GetAllPatients()
         {
             return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<GetAllPatients_Result>("GetAllPatients");
         }
-
-        /*public Patient SelectAllPatients()
-        {
-           /* var date = new SqlParameter("@date", _msg.MDate);
-            var subject = new SqlParameter("@subject", _msg.MSubject);
-            var body = new SqlParameter("@body", _msg.MBody);
-            var fid = new SqlParameter("@fid", _msg.FID);
-            this.Database.ExecuteSqlCommand("exec messageinsert @Date , @Subject , @Body , @Fid", date,subject,body,fid);
-
-            this.Database.ExecuteSqlCommand("exec messageinsert");
-
-        }*/
     }
 }

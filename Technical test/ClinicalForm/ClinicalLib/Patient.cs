@@ -11,24 +11,17 @@ namespace ClinicalLib
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
     
     public partial class Patient
     {
+        public int id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string DateOfBirth { get; set; }
-        public string Country { get; set; }
         public string Diseases { get; set; }
         public string Phone { get; set; }
-        public string BloodType { get; set; }
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Key]
-        public int id { get; set; }
-
-
+    
+        public virtual BloodType BloodType { get; set; }
+        public virtual Country Country { get; set; }
     }
-
-   
 }

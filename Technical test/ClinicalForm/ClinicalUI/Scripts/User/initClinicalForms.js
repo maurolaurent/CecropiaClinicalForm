@@ -1,7 +1,84 @@
-﻿function DxControls() {
+﻿/*
+* Clinical Form Javascript Control Initialization Module
+* Grid configurations are here
+*/
+
+
+
+var bloodTypes, countries;
+
+function DxControls() {
     
-   // InitializeControlDefinitions();
-    InitPatientsGrid();
+    InitializeBloodTypes().done(function () {
+        InitializeCountries().done(function () {
+            InitPatientsGrid();
+        });
+        
+    });
+    
+}
+
+function InitializeBloodTypes() {
+
+    var dfd = $.Deferred();
+
+    var getUrl_bloodTypes = "http://localhost/ClinicalWebService/api/bloodtypes/";;
+
+    function GetBloodTypes() {
+     
+
+        $.ajax({
+            url: getUrl_bloodTypes,
+            type: "GET",
+            async: true,
+            contentType: "application/json",
+            success: function (result) {
+                bloodTypes = result;
+                dfd.resolve();
+            },
+            error: function () {
+                dfd.reject("Data Loading Error");
+            },
+            timeout: 5000
+        });
+
+        
+    };
+
+    GetBloodTypes();
+
+    return dfd;
+}
+
+function InitializeCountries() {
+    
+    var dfd = $.Deferred();
+
+    var getUrl_countries = "http://localhost/ClinicalWebService/api/countries/";;
+
+    function GetCountries() {
+
+
+        $.ajax({
+            url: getUrl_countries,
+            type: "GET",
+            async: true,
+            contentType: "application/json",
+            success: function (result) {
+                countries = result;
+                dfd.resolve();
+            },
+            error: function () {
+                dfd.reject("Data Loading Error");
+            },
+            timeout: 5000
+        });
+    };
+
+    GetCountries();
+
+    return dfd;
+
 }
 
 
@@ -14,7 +91,7 @@ function InitPatientsGrid() {
     var updateUrl = "http://localhost/ClinicalWebService/patients/update/";
 
     var patients = new DevExpress.data.CustomStore({
-        key: "Id",
+        key: "id",
         load: function (loadOptions) {
             var deferred = $.Deferred(),
                 args = {};
@@ -54,6 +131,7 @@ function InitPatientsGrid() {
                 data: JSON.stringify({ values: values }),
                 success: function (result) {
                     deferred.resolve(true);
+                    $("#gd_patients").dxDataGrid("instance").refresh();
                 },
                 error: function (a, g, x) {
                     deferred.reject("Data Loading Error " + g + ", " + x);
@@ -71,9 +149,10 @@ function InitPatientsGrid() {
                 url: removeUrl,
                 type: "DELETE",
                 contentType: "application/json",
-                data: { key: key },
+                data: JSON.stringify({ key: key }),
                 success: function (result) {
                     deferred.resolve(true);
+                    $("#gd_patients").dxDataGrid("instance").refresh();
                 },
                 error: function (a, g, x) {
                     deferred.reject("Data Loading Error " + g + ", " + x);
@@ -83,17 +162,18 @@ function InitPatientsGrid() {
 
         },
 
-        update: updateUrl && function (values) {
+        update: updateUrl && function (key,values) {
 
             var deferred = $.Deferred();
 
             $.ajax({
                 url: updateUrl,
-                type: "POST",
+                type: "PUT",
                 contentType: "application/json",
-                data: { values: JSON.stringify(values) },
+                data: JSON.stringify({ key: key ,patient: values }),
                 success: function (result) {
                     deferred.resolve(true);
+                    $("#gd_patients").dxDataGrid("instance").refresh();
                 },
                 error: function (a, g, x) {
                     deferred.reject("Data Loading Error " + g + ", " + x);
@@ -105,6 +185,8 @@ function InitPatientsGrid() {
 
     });
 
+
+    
     var grid = $("#gd_patients").dxDataGrid({
         dataSource: {
             store: patients
@@ -114,11 +196,16 @@ function InitPatientsGrid() {
             { dataField: 'id', visible: false },
             'FirstName',
             'LastName',
-            { dataField: 'DateOfBirth', format: "MM/dd/yyyy" },
-            'Country',
+            { dataField: 'DateOfBirth', dataType: 'date', format: "shortDate" },
+             {
+                 dataField: 'Country', caption: 'Country', lookup: { dataSource: countries, valueExpr: 'Id', displayExpr: 'Name' }
+             },
             'Phone',
             'Diseases',
-            'BloodType'
+            {
+                dataField: 'BloodType', caption: 'Blood Type', lookup: { dataSource: bloodTypes, valueExpr: 'Id', displayExpr: 'Antigen' }
+            }
+           
         ],
         paging: {
             pageSize: 10

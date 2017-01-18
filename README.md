@@ -2,9 +2,6 @@
 
 Technical test from Mauro Laurent
 
-##	NOTES
-Solution made with Visual Studio 2013.
-
 
 ## INSTALLATION INSTRUCTIONS
 
@@ -13,3 +10,9 @@ Solution made with Visual Studio 2013.
 2. Build the solution. You might have to update the NuGets as well.
 3. Check the both solutions ClinicalWebService and ClinicalUI. Both need to run in localhost for better results.
 4. The solutions web.config (ClinicalWebService, ClinicalUI) must match the ClinicalLib app.config cconnection string, which must point your database.
+
+## PROJECT STRUCTURE
+
+ClinicalLib: Contains CRUD operations, entity framework modules & structure and models for the solution.
+ClinicalWebService: Webservice that receives external communications, has a reference of ClinicalLib to communicate with database. Contains a Web api controllers as well MVC Controllers. MVC controllers were used to not mess too much with the routing, and therefore only used for PUT, POST, DELETE operations. Asynchronous operations are handled by the other web api controllers.
+ClinicalUI: Visual Interface of the aplication, communicates thru Ajax to the webservice, totally decoupled. Has mostly javascript and html code neccesary to run the grid.

@@ -5,44 +5,146 @@
     <!-- SSDL content -->
     <edmx:StorageModels>
     <Schema Namespace="ClinicalFormModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'ClinicalForm.dbo.Audit' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="Audit">
+          <Key>
+            <PropertyRef Name="EventTime" />
+            <PropertyRef Name="Message" />
+            <PropertyRef Name="Ocurrence" />
+            <PropertyRef Name="IsError" />
+          </Key>
+          <Property Name="EventTime" Type="datetime" Nullable="false" />
+          <Property Name="Message" Type="varchar" MaxLength="1500" Nullable="false" />
+          <Property Name="StackTrace" Type="varchar" MaxLength="5000" />
+          <Property Name="Ocurrence" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="IsError" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="BloodType">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Antigen" Type="varchar" MaxLength="5" Nullable="false" />
+          <Property Name="RHFactor" Type="varchar" MaxLength="5" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Country">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="Name" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="Acron" Type="varchar" MaxLength="3" Nullable="false" />
+        </EntityType>
         <EntityType Name="Patient">
           <Key>
             <PropertyRef Name="id" />
           </Key>
-          <Property Name="id" Type="int" Nullable="false" />
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="FirstName" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="LastName" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="DateOfBirth" Type="varchar" MaxLength="20" Nullable="false" />
-          <Property Name="Country" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="Country" Type="uniqueidentifier" Nullable="false" />
           <Property Name="Diseases" Type="text" />
           <Property Name="Phone" Type="varchar" MaxLength="50" Nullable="false" />
-          <Property Name="BloodType" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="BloodType" Type="uniqueidentifier" Nullable="false" />
         </EntityType>
+        <Association Name="FK_Country_Country">
+          <End Role="Country" Type="Self.Country" Multiplicity="1" />
+          <End Role="Country1" Type="Self.Country" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="Country">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Country1">
+              <PropertyRef Name="Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <!--Errors Found During Generation:
+warning 6037: Foreign key constraint 'FK_Country_Country1' has been omitted from the storage model. Column 'Id' of table 'ClinicalFormModel.Store.Country' is a foreign key participating in multiple relationships. A one-to-one Entity Model will not validate since data inconsistency is possible.
+        <Association Name="FK_Country_Country1">
+          <End Role="Country" Type="Self.Country" Multiplicity="1" />
+          <End Role="Country1" Type="Self.Country" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="Country">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Country1">
+              <PropertyRef Name="Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>-->
+        <Association Name="FK_Patient_BloodType">
+          <End Role="BloodType" Type="Self.BloodType" Multiplicity="1" />
+          <End Role="Patient" Type="Self.Patient" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BloodType">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Patient">
+              <PropertyRef Name="BloodType" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Patient_Country">
+          <End Role="Country" Type="Self.Country" Multiplicity="1" />
+          <End Role="Patient" Type="Self.Patient" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Country">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Patient">
+              <PropertyRef Name="Country" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Function Name="GetAllPatients" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo" />
         <EntityContainer Name="ClinicalFormModelStoreContainer">
+          <EntitySet Name="BloodType" EntityType="Self.BloodType" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Country" EntityType="Self.Country" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Patient" EntityType="Self.Patient" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Audit" EntityType="Self.Audit" store:Type="Tables" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [Audit].[EventTime] AS [EventTime], 
+    [Audit].[Message] AS [Message], 
+    [Audit].[StackTrace] AS [StackTrace], 
+    [Audit].[Ocurrence] AS [Ocurrence], 
+    [Audit].[IsError] AS [IsError]
+    FROM [dbo].[Audit] AS [Audit]</DefiningQuery>
+          </EntitySet>
+          <AssociationSet Name="FK_Country_Country" Association="Self.FK_Country_Country">
+            <End Role="Country" EntitySet="Country" />
+            <End Role="Country1" EntitySet="Country" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Patient_BloodType" Association="Self.FK_Patient_BloodType">
+            <End Role="BloodType" EntitySet="BloodType" />
+            <End Role="Patient" EntitySet="Patient" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Patient_Country" Association="Self.FK_Patient_Country">
+            <End Role="Country" EntitySet="Country" />
+            <End Role="Patient" EntitySet="Patient" />
+          </AssociationSet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="ClinicalFormModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
-        <EntityType Name="Patient">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="FirstName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="LastName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="DateOfBirth" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Country" Type="String" Nullable="false" MaxLength="50" Unicode="false" FixedLength="false" />
-          <Property Name="Diseases" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="Phone" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="BloodType" Type="String" Nullable="false" MaxLength="50" Unicode="false" FixedLength="false" />
-          <Property Name="id" Type="Int32" Nullable="false" />
-        </EntityType>
         <EntityContainer Name="ClinicalFormEntities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="Patient" EntityType="Self.Patient" />
           <FunctionImport Name="GetAllPatients" ReturnType="Collection(ClinicalFormModel.GetAllPatients_Result)" />
-        </EntityContainer>
+          <EntitySet Name="BloodType" EntityType="ClinicalFormModel.BloodType" />
+          <EntitySet Name="Country" EntityType="ClinicalFormModel.Country" />
+          <EntitySet Name="Patient" EntityType="ClinicalFormModel.Patient" />
+          <AssociationSet Name="FK_Patient_BloodType" Association="ClinicalFormModel.FK_Patient_BloodType">
+            <End Role="BloodType" EntitySet="BloodType" />
+            <End Role="Patient" EntitySet="Patient" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Patient_Country" Association="ClinicalFormModel.FK_Patient_Country">
+            <End Role="Country" EntitySet="Country" />
+            <End Role="Patient" EntitySet="Patient" />
+          </AssociationSet>
+          <EntitySet Name="Audit" EntityType="ClinicalFormModel.Audit" />
+          </EntityContainer>
         <ComplexType Name="GetAllPatients_Result">
           <Property Type="Int32" Name="id" Nullable="false" />
           <Property Type="String" Name="FirstName" Nullable="false" MaxLength="100" />
@@ -53,26 +155,64 @@
           <Property Type="String" Name="Phone" Nullable="false" MaxLength="50" />
           <Property Type="String" Name="BloodType" Nullable="false" MaxLength="50" />
         </ComplexType>
-      </Schema>
+        <EntityType Name="BloodType">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <Property Name="Antigen" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <Property Name="RHFactor" Type="String" Nullable="false" MaxLength="5" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Patient" Relationship="ClinicalFormModel.FK_Patient_BloodType" FromRole="BloodType" ToRole="Patient" />
+        </EntityType>
+        <EntityType Name="Country">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Guid" Nullable="false" />
+          <Property Name="Name" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Acron" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Patient" Relationship="ClinicalFormModel.FK_Patient_Country" FromRole="Country" ToRole="Patient" />
+          </EntityType>
+        <EntityType Name="Patient">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="FirstName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="LastName" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="DateOfBirth" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Diseases" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="Phone" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="BloodType" Relationship="ClinicalFormModel.FK_Patient_BloodType" FromRole="Patient" ToRole="BloodType" />
+          <NavigationProperty Name="Country" Relationship="ClinicalFormModel.FK_Patient_Country" FromRole="Patient" ToRole="Country" />
+        </EntityType>
+        <Association Name="FK_Patient_BloodType">
+          <End Type="ClinicalFormModel.BloodType" Role="BloodType" Multiplicity="1" />
+          <End Type="ClinicalFormModel.Patient" Role="Patient" Multiplicity="*" />
+        </Association>
+        <Association Name="FK_Patient_Country">
+          <End Type="ClinicalFormModel.Country" Role="Country" Multiplicity="1" />
+          <End Type="ClinicalFormModel.Patient" Role="Patient" Multiplicity="*" />
+        </Association>
+        <EntityType Name="Audit">
+          <Key>
+            <PropertyRef Name="EventTime" />
+            <PropertyRef Name="Message" />
+            <PropertyRef Name="Ocurrence" />
+            <PropertyRef Name="IsError" />
+          </Key>
+          <Property Name="EventTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Message" Type="String" Nullable="false" MaxLength="1500" FixedLength="false" Unicode="false" />
+          <Property Name="StackTrace" Type="String" MaxLength="5000" FixedLength="false" Unicode="false" />
+          <Property Name="Ocurrence" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="IsError" Type="Int32" Nullable="false" />
+        </EntityType>
+        </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="ClinicalFormModelStoreContainer" CdmEntityContainer="ClinicalFormEntities">
-          <EntitySetMapping Name="Patient">
-            <EntityTypeMapping TypeName="ClinicalFormModel.Patient">
-              <MappingFragment StoreEntitySet="Patient">
-                <ScalarProperty Name="id" ColumnName="id" />
-                <ScalarProperty Name="FirstName" ColumnName="FirstName" />
-                <ScalarProperty Name="LastName" ColumnName="LastName" />
-                <ScalarProperty Name="DateOfBirth" ColumnName="DateOfBirth" />
-                <ScalarProperty Name="Country" ColumnName="Country" />
-                <ScalarProperty Name="Diseases" ColumnName="Diseases" />
-                <ScalarProperty Name="Phone" ColumnName="Phone" />
-                <ScalarProperty Name="BloodType" ColumnName="BloodType" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <FunctionImportMapping FunctionImportName="GetAllPatients" FunctionName="ClinicalFormModel.Store.GetAllPatients">
             <ResultMapping>
               <ComplexTypeMapping TypeName="ClinicalFormModel.GetAllPatients_Result">
@@ -87,7 +227,64 @@
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
-        </EntityContainerMapping>
+          <EntitySetMapping Name="BloodType">
+            <EntityTypeMapping TypeName="ClinicalFormModel.BloodType">
+              <MappingFragment StoreEntitySet="BloodType">
+                <ScalarProperty Name="RHFactor" ColumnName="RHFactor" />
+                <ScalarProperty Name="Antigen" ColumnName="Antigen" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Country">
+            <EntityTypeMapping TypeName="ClinicalFormModel.Country">
+              <MappingFragment StoreEntitySet="Country">
+                <ScalarProperty Name="Acron" ColumnName="Acron" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Patient">
+            <EntityTypeMapping TypeName="ClinicalFormModel.Patient">
+              <MappingFragment StoreEntitySet="Patient">
+                <ScalarProperty Name="Phone" ColumnName="Phone" />
+                <ScalarProperty Name="Diseases" ColumnName="Diseases" />
+                <ScalarProperty Name="DateOfBirth" ColumnName="DateOfBirth" />
+                <ScalarProperty Name="LastName" ColumnName="LastName" />
+                <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+                <ScalarProperty Name="id" ColumnName="id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <AssociationSetMapping Name="FK_Patient_BloodType" TypeName="ClinicalFormModel.FK_Patient_BloodType" StoreEntitySet="Patient">
+            <EndProperty Name="Patient">
+              <ScalarProperty Name="id" ColumnName="id" />
+            </EndProperty>
+            <EndProperty Name="BloodType">
+              <ScalarProperty Name="Id" ColumnName="BloodType" />
+            </EndProperty>
+          </AssociationSetMapping>
+          <AssociationSetMapping Name="FK_Patient_Country" TypeName="ClinicalFormModel.FK_Patient_Country" StoreEntitySet="Patient">
+            <EndProperty Name="Patient">
+              <ScalarProperty Name="id" ColumnName="id" />
+            </EndProperty>
+            <EndProperty Name="Country">
+              <ScalarProperty Name="Id" ColumnName="Country" />
+            </EndProperty>
+          </AssociationSetMapping>
+          <EntitySetMapping Name="Audit">
+            <EntityTypeMapping TypeName="ClinicalFormModel.Audit">
+              <MappingFragment StoreEntitySet="Audit">
+                <ScalarProperty Name="IsError" ColumnName="IsError" />
+                <ScalarProperty Name="Ocurrence" ColumnName="Ocurrence" />
+                <ScalarProperty Name="StackTrace" ColumnName="StackTrace" />
+                <ScalarProperty Name="Message" ColumnName="Message" />
+                <ScalarProperty Name="EventTime" ColumnName="EventTime" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
   </edmx:Runtime>

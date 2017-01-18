@@ -14,7 +14,7 @@ namespace ClinicalWebService.Controllers
 {
     public class PatientController : ApiController
     {
-        // GET: api/BloodType
+       
         public async Task<AjaxResp> Get()
         {            
             return await DoGetPatients();
@@ -28,41 +28,25 @@ namespace ClinicalWebService.Controllers
 
         private AjaxResp GetPatients() {
 
-            PatientCRUD crud = new PatientCRUD();
-
             List<Patient> patients = PatientCRUD.SelectPatient();
-            return new AjaxResp { totalCount = patients.Count, items = patients };
+
+            //Due to Guid not being serializable...
+            List<View_Patient> vpatients = (from pp in patients
+                              select new View_Patient
+                              {
+                                  id = pp.id,
+                                  FirstName = pp.FirstName,
+                                  LastName = pp.LastName,
+                                  DateOfBirth = pp.DateOfBirth,
+                                  Country = pp.Country.Id.ToString(),
+                                  Phone = pp.Phone,
+                                  Diseases = pp.Diseases,
+                                  BloodType = pp.BloodType.Id.ToString()
+                              }).ToList();
+
+            return new AjaxResp { totalCount = patients.Count, items = vpatients };
         }
 
 
-
-
-        // GET: api/Patient
-      
-        // GET: api/Patient/5
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        // POST: api/Patient
-        [System.Web.Http.HttpPost]
-        public HttpResponseMessage Post(Patient value)
-        {
-            return Request.CreateResponse(HttpStatusCode.Gone);
-
-        }
-
-      /*  [System.Web.Http.HttpPut]
-        public HttpResponseMessage Put(string value)
-        {
-            return Request.CreateResponse(HttpStatusCode.Gone);
-
-        }*/
-
-        // DELETE: api/Patient/5
-        public void Delete(int id)
-        {
-        }
     }
 }
